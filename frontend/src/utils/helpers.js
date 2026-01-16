@@ -1,0 +1,79 @@
+export const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+export const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
+
+export const formatDateTime = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+export const getFileExtension = (filename) => {
+  return filename.split('.').pop().toUpperCase();
+};
+
+export const generateId = () => {
+  return Math.random().toString(36).substr(2, 9);
+};
+
+export const debounce = (func, wait) => {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
+export const truncateText = (text, maxLength = 100) => {
+  if (text.length <= maxLength) return text;
+  return text.substr(0, maxLength) + '...';
+};
+
+export const validateFile = (file) => {
+  const allowedTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/plain',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+  ];
+  
+  const maxSize = 50 * 1024 * 1024; // 50MB
+  
+  if (!allowedTypes.includes(file.type)) {
+    return { isValid: false, error: 'File type not supported' };
+  }
+  
+  if (file.size > maxSize) {
+    return { isValid: false, error: 'File size too large. Maximum 50MB allowed.' };
+  }
+  
+  return { isValid: true };
+};

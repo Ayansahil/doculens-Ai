@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: var(--background, #fff);
+    color: var(--foreground, #000);
+    font-family: 'Inter', theme('fontFamily.sans');
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-500 text-white px-4 py-2 rounded-md transition-colors hover:bg-blue-600;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-md transition-colors hover:bg-gray-300;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-md text-gray-300 transition-all duration-200;
+  }
+  .sidebar-item:hover {
+    @apply text-white bg-gray-700;
+  }
+  
+  .sidebar-item.active {
+    @apply bg-blue-500 text-white;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
