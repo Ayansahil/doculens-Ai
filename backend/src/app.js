@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -7,7 +8,6 @@ import documentRoutes from './routes/document.routes.js';
 import analyticsRoutes from './routes/analytics.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
