@@ -2,39 +2,7 @@ import { supabase } from '../config/db.js';
 
 export const getDashboardStats = async (req, res) => {
   try {
-    // 🔴 TEMP MOCK DATA (REMOVE AFTER UI TEST)
-    if (process.env.NODE_ENV !== 'production') {
-      return res.json({
-        totalDocuments: 5,
-        analysedDocuments: 3,
-        highRiskDocuments: 1,
-        pendingDocuments: 2,
-        storageUsed: 1.5,
-        totalStorage: 10,
-        recentActivity: [
-          {
-            id: 'activity-1',
-            user: 'Ayan',
-            type: 'upload',
-            document: 'Sample Contract',
-            status: 'Analysed',
-            time: 'Just now'
-          }
-        ],
-        recentDocuments: [
-          {
-            id: 1,
-            title: 'Sample Contract',
-            type: 'PDF',
-            category: 'Legal',
-            status: 'High Risk',
-            date: new Date().toISOString(),
-            description: 'Mock data for UI testing'
-          }
-        ]
-      });
-    }
-
+   
     // 🟢 REAL DATABASE LOGIC (PRODUCTION)
     const { data: allDocuments, error: allError } = await supabase
       .from('documents')

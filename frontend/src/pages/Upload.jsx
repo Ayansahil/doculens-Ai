@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import DocumentUpload from '../components/features/DocumentUpload';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button'; 
-import { FileText, ArrowUp, CircleCheck as CheckCircle } from 'lucide-react';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import DocumentUpload from "../components/features/DocumentUpload";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import { FileText, ArrowUp, CircleCheck as CheckCircle } from "lucide-react";
 
 const Upload = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -11,9 +11,10 @@ const Upload = () => {
   const navigate = useNavigate();
 
   const handleUploadComplete = (files) => {
-    setUploadedFiles(files);
+    const safeFiles = Array.isArray(files) ? files : files ? [files] : [];
+    setUploadedFiles(safeFiles);
     setShowSuccess(true);
-    
+
     // Auto-hide success message after 5 seconds
     setTimeout(() => {
       setShowSuccess(false);
@@ -21,7 +22,7 @@ const Upload = () => {
   };
 
   const handleViewDocuments = () => {
-    navigate('/documents');
+    navigate("/documents");
   };
 
   return (
@@ -33,7 +34,8 @@ const Upload = () => {
         </div>
         <h1 className="text-xl font-bold text-gray-900">Upload Documents</h1>
         <p className="text-gray-600 mt-2 max-w-2xl mx-auto">
-          Upload your documents for AI-powered analysis. Supported formats include PDF, DOC, DOCX, TXT, XLSX, and PPTX files.
+          Upload your documents for AI-powered analysis. Supported formats
+          include PDF, DOC, DOCX, TXT, XLSX, and PPTX files.
         </p>
       </div>
 
@@ -43,9 +45,12 @@ const Upload = () => {
           <div className="flex items-center gap-3">
             <CheckCircle className="h-8 w-8 text-green-500 flex-shrink-0" />
             <div className="flex-1">
-              <h3 className="font-semibold text-green-900">Upload Successful!</h3>
+              <h3 className="font-semibold text-green-900">
+                Upload Successful!
+              </h3>
               <p className="text-green-700 mt-1">
-                {uploadedFiles.length} file(s) have been uploaded and are ready for analysis.
+                {uploadedFiles.length} file(s) have been uploaded and are ready
+                for analysis.
               </p>
             </div>
             <Button
@@ -84,7 +89,7 @@ const Upload = () => {
                   <li>• PowerPoint presentations (PPTX)</li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
                   <CheckCircle size={16} className="text-primary-500" />
@@ -105,22 +110,32 @@ const Upload = () => {
           {uploadedFiles.length > 0 && (
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-900">Recently Uploaded</h3>
-                <Button variant="outline" size="sm" onClick={handleViewDocuments}>
+                <h3 className="font-semibold text-gray-900">
+                  Recently Uploaded
+                </h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleViewDocuments}
+                >
                   View All Documents
                 </Button>
               </div>
-              
+
               <div className="space-y-3">
                 {uploadedFiles.slice(0, 3).map((file) => (
-                  <div key={file.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={file.id}
+                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                  >
                     <div className="h-10 w-10 bg-primary-100 rounded-lg flex items-center justify-center">
                       <FileText size={20} className="text-primary-600" />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900">{file.name}</h4>
                       <p className="text-sm text-gray-600">
-                        {Math.round(file.size / 1024 / 1024 * 100) / 100} MB • Uploaded successfully
+                        {Math.round((file.size / 1024 / 1024) * 100) / 100} MB •
+                        Uploaded successfully
                       </p>
                     </div>
                     <div className="text-green-500">
