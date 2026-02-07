@@ -84,81 +84,76 @@ const ChatBot = ({ documentId = null, className = '' }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+const handleSendMessage = async () => {
+  if (!inputMessage.trim()) return;
 
-    const userMessage = {
-      id: Date.now(),
-      type: 'user',
-      content: inputMessage.trim(),
+  const userMessage = {
+    id: Date.now(),
+    type: 'user',
+    content: inputMessage.trim(),
+    timestamp: new Date().toISOString()
+  };
+
+  setMessages(prev => [...prev, userMessage]);
+  setInputMessage('');
+  setIsTyping(true);
+
+  try {
+    // ✅ Real API call
+    const response = await fetch('http://localhost:3001/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: userMessage.content,
+        documentId: documentId
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || data.message || 'Failed to get response');
+    }
+
+    // ✅ Add bot response
+    const botMessage = {
+      id: data.botMessage.id,
+      type: 'bot',
+      content: data.botMessage.content,
+      timestamp: data.botMessage.timestamp,
+      documentRef: null,
+      suggestions: null
+    };
+
+    setMessages(prev => [...prev, botMessage]);
+    setIsTyping(false);
+
+  } catch (error) {
+    console.error('Chat error:', error);
+    
+    const errorMsg = {
+      id: Date.now() + 1,
+      type: 'bot',
+      content: error.message.includes('loading') 
+        ? '⏳ AI model is loading. Wait 20 seconds and try again.'
+        : `❌ Error: ${error.message}`,
       timestamp: new Date().toISOString()
     };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
-    setIsTyping(true);
-
-    try {
-      // Simulate AI response
-      const response = await simulateAIResponse(userMessage.content);
-      
-      const botMessage = {
-        id: Date.now() + 1,
-        type: 'bot',
-        content: response.content,
-        timestamp: new Date().toISOString(),
-        documentRef: response.documentRef,
-        suggestions: response.suggestions
-      };
-
-      setTimeout(() => {
-        setMessages(prev => [...prev, botMessage]);
-        setIsTyping(false);
-      }, 1500);
-
-    } catch (error) {
-      console.error('Chat error:', error);
-      addNotification({
-        type: 'error',
-        message: 'Failed to get AI response'
-      });
-      setIsTyping(false);
-    }
-  };
-
-  const simulateAIResponse = async (message) => {
-    const lowerMessage = message.toLowerCase();
     
-    if (lowerMessage.includes('risk') || lowerMessage.includes('main risk')) {
-      return {
-        content: 'Based on \'Q4 we run\'t\' and the main risks are **12% net profit variance** 3 inconsidencies flagged, default rate "recognition. See page 3 and 5 |',
-        documentRef: { pages: [3, 5] },
-        suggestions: ['Show detailed breakdown', 'Compare with previous quarter']
-      };
-    }
+    setMessages(prev => [...prev, errorMsg]);
+    setIsTyping(false);
     
-    if (lowerMessage.includes('summarize') || lowerMessage.includes('summary')) {
-      return {
-        content: 'Here\'s a summary of the key findings:\n\n• **Revenue Growth**: 8.5% year-over-year\n• **Net Profit Variance**: 12% below projections\n• **Risk Assessment**: Medium-high (7.2/10)\n• **Action Items**: 3 critical issues identified\n\nThe document indicates strong revenue performance but profit margins are concerning.',
-        suggestions: ['Get detailed breakdown', 'View recommendations']
-      };
-    }
+    addNotification({
+      type: 'error',
+      message: error.message
+    });
+  }
+};
 
-    if (lowerMessage.includes('translate') || lowerMessage.includes('spanish')) {
-      return {
-        content: '**Resumen del Documento:**\n\nInforme Financiero Q4 2024\n• Crecimiento de ingresos: 8.5%\n• Varianza de beneficio neto: 12%\n• Evaluación de riesgo: Media-alta\n\n¿Te gustaría que traduzca alguna sección específica?',
-        suggestions: ['Traducir sección completa', 'Ver métricas clave']
-      };
-    }
-
-    // Default response
-    return {
-      content: `I understand you're asking about: "${message}"\n\nBased on the document analysis, I can help you with:\n• Content extraction and analysis\n• Risk assessment\n• Data validation\n• Summarization\n• Translation services\n\nCould you be more specific about what you'd like to know?`,
-      suggestions: ['Ask about specific sections', 'Request data extraction', 'Get recommendations']
-    };
-  };
-
-  const handleSuggestedPrompt = (prompt) => {
+ 
+const handleSuggestedPrompt = (prompt) => {
     setInputMessage(prompt);
   };
 

@@ -3,7 +3,18 @@ import { sendChatMessage, getChatHistory } from '../controllers/chat.controller.
 
 const router = express.Router();
 
-router.post('/', sendChatMessage);
+// ✅ GET /chat - Health check (SPECIFIC ROUTES PEHLE)
 router.get('/history', getChatHistory);
+
+// ✅ GET /chat - Health
+router.get('/', (req, res) => {
+  res.json({
+    message: 'Chat API is working',
+    status: 'ok',
+});
+});
+
+// ✅ POST /chat - Send message
+router.post('/', sendChatMessage);
 
 export default router;
