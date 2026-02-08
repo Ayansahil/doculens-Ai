@@ -1,14 +1,15 @@
-import axios from 'axios';
-import { STORAGE_KEYS } from '../utils/constants';
+import axios from "axios";
+import { STORAGE_KEYS } from "../utils/constants";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
 // Create axios instance
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -23,7 +24,7 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor for error handling
@@ -33,41 +34,45 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USER_DATA);
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const api = {
   // Authentication
-  login: (credentials) => apiClient.post('/auth/login', credentials),
-  register: (userData) => apiClient.post('/auth/register', userData),
-  logout: () => apiClient.post('/auth/logout'),
-  
+  login: (credentials) => apiClient.post("/auth/login", credentials),
+  register: (userData) => apiClient.post("/auth/register", userData),
+  logout: () => apiClient.post("/auth/logout"),
+
   // Documents
-  getDocuments: (params = {}) => apiClient.get('/documents', { params }),
+  getDocuments: (params = {}) => apiClient.get("/documents", { params }),
   getDocument: (id) => apiClient.get(`/documents/${id}`),
-  uploadDocument: (formData, onUploadProgress) => 
-    apiClient.post('/documents/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+  uploadDocument: (formData, onUploadProgress) =>
+    apiClient.post("/documents/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
       onUploadProgress,
     }),
   updateDocument: (id, data) => apiClient.put(`/documents/${id}`, data),
   deleteDocument: (id) => apiClient.delete(`/documents/${id}`),
-  
+
   // Search
-  searchDocuments: (query) => apiClient.get('/search', { params: { q: query } }),
-  
+  searchDocuments: (query) =>
+    apiClient.get("/search", { params: { q: query } }),
+
   // Chat
-  sendChatMessage: (message, documentId = null) => 
-    apiClient.post('/chat', { message, documentId }),
-  getChatHistory: (documentId = null) => 
-    apiClient.get('/chat/history', { params: { documentId } }),
-  
+  sendChatMessage: (message, documentId = null) =>
+    apiClient.post("/chat", { message, documentId }),
+  getChatHistory: (documentId = null) =>
+    apiClient.get("/chat/history", { params: { documentId } }),
+
   // Analytics
-  getDashboardStats: () => apiClient.get('/analytics/dashboard'),
-  getStorageInfo: () => apiClient.get('/analytics/storage'),
+  getDashboardStats: () => apiClient.get("/analytics/dashboard"),
+  getStorageInfo: () => apiClient.get("/analytics/storage"),
+
+  // Documents – AI Summary
+  summarizeDocument: (id) => apiClient.post(`/documents/${id}/summarize`),
 };
 
 export default apiClient;

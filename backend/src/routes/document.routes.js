@@ -5,7 +5,8 @@ import {
   uploadDocument,
   updateDocument,
   deleteDocument,
-  downloadDocumentLogic
+  downloadDocumentLogic,
+  summarizeDocument
 } from '../controllers/document.controller.js';
 import { upload } from '../middleware/upload.middleware.js';
 
@@ -20,6 +21,9 @@ router.get('/', getAllDocuments);
 // ✅ DOWNLOAD DOCUMENT
 router.get('/:id/download', downloadDocumentLogic);
 
+// ✅ SUMMARIZE DOCUMENT
+router.post("/:id/summarize", summarizeDocument);
+
 // ✅ GET DOCUMENT BY ID (LAST AMONG GETs)
 router.get('/:id', getDocumentById);
 
@@ -28,5 +32,7 @@ router.put('/:id', updateDocument);
 
 // ✅ DELETE DOCUMENT
 router.delete('/:id', deleteDocument);
+
+
 
 export default router;

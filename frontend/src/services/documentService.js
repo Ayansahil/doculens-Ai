@@ -34,6 +34,12 @@ export const documentService = {
     const res = await api.deleteDocument(id);
     return res.data;
   },
+
+  async summarizeDocument(id) {
+  const res = await api.summarizeDocument(id);
+  return res.data;
+},
+
 };
 
 export default documentService;

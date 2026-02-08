@@ -1,179 +1,182 @@
-import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, FileText, Sparkles, MessageSquare } from 'lucide-react';
-import Card from '../ui/Card';
-import PropTypes from 'prop-types';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
-import Badge from '../ui/Badge';
-import { useApp } from '../../context/AppContext';
+import { useState, useRef, useEffect } from "react";
+import {
+  Send,
+  Bot,
+  User,
+  FileText,
+  Sparkles,
+  MessageSquare,
+} from "lucide-react";
+import Card from "../ui/Card";
+import PropTypes from "prop-types";
+import Button from "../ui/Button";
+import Input from "../ui/Input";
+import Badge from "../ui/Badge";
+import { useApp } from "../../context/AppContext";
 
-const ChatBot = ({ documentId = null, className = '' }) => {
+const ChatBot = ({
+  documentId = null,
+  summary = null,
+  summaryLoading = false,
+  className = "",
+}) => {
   const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [activeTab, setActiveTab] = useState('chatbot');
+  const [activeTab, setActiveTab] = useState("chatbot");
+
+  // 🔹 STRUCTURED DATA STATE
   const [structuredData, setStructuredData] = useState(null);
+
   const messagesEndRef = useRef();
   const { addNotification } = useApp();
 
   const suggestedPrompts = [
-    'Summarize key points',
-    'Translate to Spanish?',
-    'What are the main risks?',
-    'Extract key data',
-    'Find inconsistencies',
-    'Generate report'
+    "Summarize key points",
+    "What is this document about?",
+    "Translate to Spanish?",
+    "What are the main risks?",
+    "Extract key data",
+    "Find inconsistencies",
+    "Generate report",
   ];
 
-  const mockStructuredData = {
-    documentType: 'Financial Report',
-    keyMetrics: {
-      'Net Profit Variance': '12%',
-      'Revenue Growth': '8.5%',
-      'Total Assets': '$2.4M',
-      'Risk Score': '7.2/10'
-    },
-    flaggedItems: [
-      {
-        type: 'Inconsistency',
-        location: 'Page 3, Section 2.1',
-        description: 'Revenue figures don\'t match summary',
-        severity: 'High'
-      },
-      {
-        type: 'Missing Data',
-        location: 'Page 5, Table 1',
-        description: 'Q3 data incomplete',
-        severity: 'Medium'
-      }
-    ],
-    recommendations: [
-      'Review revenue calculation methodology',
-      'Verify Q3 data completeness',
-      'Update financial controls'
-    ]
-  };
-
+  /* ===============================
+     INIT MESSAGE
+  ================================ */
   useEffect(() => {
-    // Initialize with welcome message
     if (messages.length === 0) {
       setMessages([
         {
           id: 1,
-          type: 'bot',
-          content: documentId 
-            ? 'I\'m ready to help you analyze this document. What would you like to know?' 
-            : 'Hello! Upload a document and I\'ll help you analyze it. You can ask me questions about content, extract key information, or generate summaries.',
+          type: "bot",
+          content: documentId
+            ? "I'm ready to help you analyze this document. What would you like to know?"
+            : "Hello! Upload a document and I'll help you analyze it.",
           timestamp: new Date().toISOString(),
-          documentRef: documentId
-        }
+        },
       ]);
-
-      // Set mock structured data if document is loaded
-      if (documentId) {
-        setStructuredData(mockStructuredData);
-      }
     }
   }, [documentId, messages.length]);
 
+  /* ===============================
+     SCROLL CHAT
+  ================================ */
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  /* ===============================
+     BUILD STRUCTURED DATA FROM SUMMARY
+  ================================ */
+  useEffect(() => {
+    if (!documentId) return;
 
-const handleSendMessage = async () => {
-  if (!inputMessage.trim()) return;
+    if (summary && !summaryLoading) {
+      setStructuredData({
+        documentType: "Uploaded Document",
 
-  const userMessage = {
-    id: Date.now(),
-    type: 'user',
-    content: inputMessage.trim(),
-    timestamp: new Date().toISOString()
-  };
+        keyMetrics: {
+          "Summary Length": `${summary.length} characters`,
+          Status: "Generated",
+        },
 
-  setMessages(prev => [...prev, userMessage]);
-  setInputMessage('');
-  setIsTyping(true);
+        flaggedItems: [],
 
-  try {
-    // ✅ Real API call
-    const response = await fetch('http://localhost:3001/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: userMessage.content,
-        documentId: documentId
-      })
-    });
+        recommendations: [
+          "Review extracted summary",
+          "Ask questions in chatbot",
+          "Verify important clauses",
+        ],
 
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(data.error || data.message || 'Failed to get response');
+        summaryText: summary, // 👈 MAIN THING
+      });
     }
+  }, [summary, summaryLoading, documentId]);
 
-    // ✅ Add bot response
-    const botMessage = {
-      id: data.botMessage.id,
-      type: 'bot',
-      content: data.botMessage.content,
-      timestamp: data.botMessage.timestamp,
-      documentRef: null,
-      suggestions: null
+  /* ===============================
+     SEND CHAT MESSAGE
+  ================================ */
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim()) return;
+
+    const userMessage = {
+      id: Date.now(),
+      type: "user",
+      content: inputMessage.trim(),
+      timestamp: new Date().toISOString(),
     };
 
-    setMessages(prev => [...prev, botMessage]);
-    setIsTyping(false);
+    setMessages((prev) => [...prev, userMessage]);
+    setInputMessage("");
+    setIsTyping(true);
 
-  } catch (error) {
-    console.error('Chat error:', error);
-    
-    const errorMsg = {
-      id: Date.now() + 1,
-      type: 'bot',
-      content: error.message.includes('loading') 
-        ? '⏳ AI model is loading. Wait 20 seconds and try again.'
-        : `❌ Error: ${error.message}`,
-      timestamp: new Date().toISOString()
-    };
-    
-    setMessages(prev => [...prev, errorMsg]);
-    setIsTyping(false);
-    
-    addNotification({
-      type: 'error',
-      message: error.message
-    });
-  }
-};
+    try {
+      const response = await fetch("http://localhost:3001/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userMessage.content,
+          documentId,
+        }),
+      });
 
- 
-const handleSuggestedPrompt = (prompt) => {
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || data.message || "Failed");
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: data.botMessage.id,
+          type: "bot",
+          content: data.botMessage.content,
+          timestamp: data.botMessage.timestamp,
+        },
+      ]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          type: "bot",
+          content: `❌ ${error.message}`,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+
+      addNotification({ type: "error", message: error.message });
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const handleSuggestedPrompt = (prompt) => {
     setInputMessage(prompt);
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
+  /* ===============================
+     UI
+  ================================ */
   return (
     <Card className={`h-full flex flex-col ${className}`}>
       {/* Tabs */}
       <div className="flex border-b border-gray-200">
         <button
-          onClick={() => setActiveTab('structured')}
-          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'structured'
-              ? 'border-primary-500 text-primary-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+          onClick={() => setActiveTab("structured")}
+          className={`px-4 py-3 text-sm font-medium border-b-2 ${
+            activeTab === "structured"
+              ? "border-primary-500 text-primary-600"
+              : "border-transparent text-gray-500"
           }`}
         >
           <div className="flex items-center gap-2">
@@ -181,12 +184,13 @@ const handleSuggestedPrompt = (prompt) => {
             Structured Data Output
           </div>
         </button>
+
         <button
-          onClick={() => setActiveTab('chatbot')}
-          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'chatbot'
-              ? 'border-primary-500 text-primary-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+          onClick={() => setActiveTab("chatbot")}
+          className={`px-4 py-3 text-sm font-medium border-b-2 ${
+            activeTab === "chatbot"
+              ? "border-primary-500 text-primary-600"
+              : "border-transparent text-gray-500"
           }`}
         >
           <div className="flex items-center gap-2">
@@ -196,189 +200,123 @@ const handleSuggestedPrompt = (prompt) => {
         </button>
       </div>
 
-      {/* Tab Content */}
+      {/* CONTENT */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === 'structured' ? (
-          <div className="p-4 h-full overflow-y-auto">
+        {activeTab === "structured" ? (
+          <div className="p-4 h-full overflow-y-auto space-y-6">
             {structuredData ? (
-              <div className="space-y-6">
-                {/* Document Type */}
+              <>
+                {/* SUMMARY */}
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Document Type</h3>
-                  <Badge variant="primary">{structuredData.documentType}</Badge>
+                  <h3 className="font-semibold mb-2">Document Summary</h3>
+                  {summaryLoading ? (
+                    <p className="text-gray-500">Generating summary...</p>
+                  ) : (
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                      {structuredData.summaryText}
+                    </p>
+                  )}
                 </div>
 
-                {/* Key Metrics */}
+                {/* METRICS */}
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Key Metrics</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {Object.entries(structuredData.keyMetrics).map(([key, value]) => (
-                      <div key={key} className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-600">{key}</p>
-                        <p className="text-lg font-semibold text-gray-900">{value}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Flagged Items */}
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Flagged Items</h3>
-                  <div className="space-y-3">
-                    {structuredData.flaggedItems.map((item, index) => (
-                      <div key={index} className="p-3 border border-gray-200 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium text-gray-900">{item.type}</h4>
-                          <Badge variant={item.severity.toLowerCase() === 'high' ? 'error' : 'warning'}>
-                            {item.severity}
-                          </Badge>
+                  <h3 className="font-semibold mb-2">Key Metrics</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {Object.entries(structuredData.keyMetrics).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          className="p-3 bg-gray-50 rounded-lg"
+                        >
+                          <p className="text-xs text-gray-500">{key}</p>
+                          <p className="font-semibold">{value}</p>
                         </div>
-                        <p className="text-sm text-gray-600 mb-1">{item.description}</p>
-                        <p className="text-xs text-gray-500">{item.location}</p>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 </div>
 
-                {/* Recommendations */}
+                {/* RECOMMENDATIONS */}
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Recommendations</h3>
-                  <ul className="space-y-2">
-                    {structuredData.recommendations.map((rec, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <div className="h-1.5 w-1.5 bg-primary-500 rounded-full mt-2 flex-shrink-0" />
-                        <span className="text-sm text-gray-700">{rec}</span>
+                  <h3 className="font-semibold mb-2">Recommendations</h3>
+                  <ul className="space-y-1">
+                    {structuredData.recommendations.map((rec, i) => (
+                      <li key={i} className="text-sm text-gray-700">
+                        • {rec}
                       </li>
                     ))}
                   </ul>
                 </div>
-              </div>
+              </>
             ) : (
-              <div className="h-full flex items-center justify-center text-gray-500">
-                <div className="text-center">
-                  <FileText size={48} className="mx-auto mb-4 opacity-50" />
-                  <p>No structured data available</p>
-                  <p className="text-sm mt-1">Upload and analyze a document to see structured output</p>
-                </div>
-              </div>
+              <p className="text-gray-500 text-center">
+                No structured data available
+              </p>
             )}
           </div>
         ) : (
-          <div className="flex flex-col h-full">
-            {/* Messages */}
+          <>
+            {/* CHAT */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((message) => (
+              {messages.map((m) => (
                 <div
-                  key={message.id}
-                  className={`flex gap-3 ${
-                    message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
+                  key={m.id}
+                  className={`flex ${
+                    m.type === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
-                    message.type === 'user' 
-                      ? 'bg-primary-500 text-white' 
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {message.type === 'user' ? <User size={16} /> : <Bot size={16} />}
-                  </div>
-                  
-                  <div className={`flex-1 max-w-[80%] ${
-                    message.type === 'user' ? 'text-right' : 'text-left'
-                  }`}>
-                    <div className={`inline-block p-3 rounded-lg ${
-                      message.type === 'user'
-                        ? 'bg-primary-500 text-white'
-                        : 'bg-gray-100 text-gray-900'
-                    }`}>
-                      <div className="whitespace-pre-wrap">{message.content}</div>
-                      {message.documentRef && (
-                        <div className="mt-2 pt-2 border-t border-gray-200 text-xs">
-                          <span className="inline-flex items-center gap-1 text-primary-600">
-                            <FileText size={12} />
-                            Link: page {message.documentRef.pages?.join(', ')}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {message.suggestions && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {message.suggestions.map((suggestion, index) => (
-                          <Button
-                            key={index}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleSuggestedPrompt(suggestion)}
-                          >
-                            {suggestion}
-                          </Button>
-                        ))}
-                      </div>
-                    )}
+                  <div
+                    className={`max-w-[75%] p-3 rounded-lg ${
+                      m.type === "user"
+                        ? "bg-primary-500 text-white"
+                        : "bg-gray-100"
+                    }`}
+                  >
+                    {m.content}
                   </div>
                 </div>
               ))}
 
               {isTyping && (
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                    <Bot size={16} className="text-gray-600" />
-                  </div>
-                  <div className="bg-gray-100 rounded-lg p-3">
-                    <div className="flex gap-1">
-                      <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" />
-                      <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-                      <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce delay-200" />
-                    </div>
-                  </div>
-                </div>
+                <div className="text-sm text-gray-500">Typing...</div>
               )}
-
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Suggested Prompts */}
+            {/* SUGGESTIONS */}
             {messages.length <= 1 && (
-              <div className="p-4 border-t border-gray-200 bg-gray-50">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Suggested Prompts</h4>
+              <div className="p-3 border-t bg-gray-50">
                 <div className="flex flex-wrap gap-2">
-                  {suggestedPrompts.map((prompt, index) => (
+                  {suggestedPrompts.map((p, i) => (
                     <Button
-                      key={index}
-                      variant="outline"
+                      key={i}
                       size="sm"
-                      onClick={() => handleSuggestedPrompt(prompt)}
-                      className="text-xs"
+                      variant="outline"
+                      onClick={() => handleSuggestedPrompt(p)}
                     >
                       <Sparkles size={12} className="mr-1" />
-                      {prompt}
+                      {p}
                     </Button>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Input */}
-            <div className="p-4 border-t border-gray-200">
+            {/* INPUT */}
+            <div className="p-4 border-t">
               <div className="flex gap-2">
                 <Input
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Ask a question about this document..."
-                  className="flex-1"
-                  disabled={isTyping}
+                  placeholder="Ask about this document..."
                 />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!inputMessage.trim() || isTyping}
-                  className="px-3"
-                >
+                <Button onClick={handleSendMessage}>
                   <Send size={16} />
                 </Button>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </Card>
@@ -389,5 +327,7 @@ export default ChatBot;
 
 ChatBot.propTypes = {
   documentId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  summary: PropTypes.string,
+  summaryLoading: PropTypes.bool,
   className: PropTypes.string,
 };

@@ -312,3 +312,55 @@ export const downloadDocumentLogic = async (req, res) => {
     res.status(500).json({ message: "Failed to download document" });
   }
 };
+
+/* ================================
+   💡SUMMARIZE DOCUMENT
+================================ */
+
+export const summarizeDocument = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1️⃣ Fetch document
+    const { data: document, error } = await supabase
+      .from("documents")
+      .select("id, title, extracted_text")
+      .eq("id", id)
+      .single();
+
+    if (error || !document) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+
+    if (!document.extracted_text || document.extracted_text.length < 50) {
+      return res.status(400).json({
+        message: "Document text not available for summarization",
+      });
+    }
+
+    // 2️⃣ SIMPLE SUMMARY LOGIC (NO AI)
+    const sentences = document.extracted_text
+      .replace(/\n+/g, " ")
+      .split(".")
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    const summarySentences = sentences.slice(0, 4);
+    const summary = summarySentences.join(". ") + ".";
+
+    // 3️⃣ Response
+    res.json({
+      documentId: document.id,
+      title: document.title,
+      summary,
+      sentenceCount: summarySentences.length,
+    });
+
+  } catch (error) {
+    console.error("Summarize error:", error);
+    res.status(500).json({
+      message: "Failed to summarize document",
+      error: error.message,
+    });
+  }
+};

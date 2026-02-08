@@ -20,6 +20,9 @@ const Documents = () => {
   const [editTarget, setEditTarget] = useState(null);
   const [newStatus, setNewStatus] = useState("");
 
+  const [summary, setSummary] = useState(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+
   const { documents, loading, error, fetchDocuments, updateFilters } =
     useDocuments();
 
@@ -33,7 +36,7 @@ const Documents = () => {
   }, [searchQuery, updateFilters]);
 
   // 🎯 Handle actions coming from DocumentList (view / delete)
-  const handleDocumentAction = (action, document) => {
+  const handleDocumentAction = async (action, document) => {
     // 👁️ View document
     if (action === "view") {
       if (document?.file_url) {
@@ -42,6 +45,19 @@ const Documents = () => {
         alert("File URL not found");
       }
       setSelectedDocument(document);
+      setSummary(null);
+      setSummaryLoading(true);
+
+      try {
+        const res = await documentService.summarizeDocument(document.id);
+        setSummary(res.summary);
+      } catch (err) {
+        console.error("Summary failed", err);
+        setSummary("Failed to generate summary.");
+      } finally {
+        setSummaryLoading(false);
+      }
+
       return;
     }
 
@@ -98,10 +114,16 @@ const Documents = () => {
             loading={loading}
             onDocumentAction={handleDocumentAction}
           />
+
+       
         </div>
 
         <div className="lg:col-span-1 max-h-[485px]">
-          <ChatBot documentId={selectedDocument?.id || null} />
+          <ChatBot
+            documentId={selectedDocument?.id || null}
+            summary={summary}
+            summaryLoading={summaryLoading}
+          />
         </div>
       </div>
 
