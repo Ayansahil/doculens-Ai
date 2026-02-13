@@ -4,7 +4,7 @@
   body {
     background-color: var(--background, #fff);
     color: var(--foreground, #000);
-    font-family: 'Inter', theme('fontFamily.sans');
+    font-family: "Inter", theme("fontFamily.sans");
   }
 }
 
@@ -16,7 +16,7 @@
   .btn-secondary {
     @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-md transition-colors hover:bg-gray-300;
   }
-  
+
   .card {
     @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
   }
@@ -27,7 +27,7 @@
   .sidebar-item:hover {
     @apply text-white bg-gray-700;
   }
-  
+
   .sidebar-item.active {
     @apply bg-blue-500 text-white;
   }
@@ -49,4 +49,31 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* Force sidebar hidden below 1024px */
+@media (max-width: 1023px) {
+  aside {
+    transform: translateX(-100%) !important;
+  }
+}
+
+/* Clean Mobile Fix <768px */
+@media (max-width: 767px) {
+
+  html, body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Remove excessive desktop padding */
+  main {
+    padding: 16px !important;
+  }
+
+  /* Ensure full width layout */
+  .min-h-screen {
+    width: 100%;
+  }
+
 }

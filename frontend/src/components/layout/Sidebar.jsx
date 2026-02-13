@@ -1,8 +1,18 @@
-import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, FileText, FolderUp, HelpCircle, LayoutTemplate, ChevronLeft, ChevronRight, Settings, Brain } from 'lucide-react';
-import { useApp } from '../../context/AppContext';
-import Button from '../ui/Button';
+import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  Home,
+  FileText,
+  FolderUp,
+  HelpCircle,
+  LayoutTemplate,
+  ChevronLeft,
+  ChevronRight,
+  Settings,
+  Brain,
+} from "lucide-react";
+import { useApp } from "../../context/AppContext";
+import Button from "../ui/Button";
 
 const Sidebar = () => {
   const { sidebarCollapsed, toggleSidebar } = useApp();
@@ -11,18 +21,18 @@ const Sidebar = () => {
 
   const navigationItems = [
     {
-      name: 'Dashboard',
-      href: '/',
+      name: "Dashboard",
+      href: "/",
       icon: Home,
     },
     {
-      name: 'Documents',
-      href: '/documents',
+      name: "Documents",
+      href: "/documents",
       icon: FileText,
     },
     {
-      name: 'Upload',
-      href: '/upload',
+      name: "Upload",
+      href: "/upload",
       icon: FolderUp,
     },
   ];
@@ -33,17 +43,19 @@ const Sidebar = () => {
     <>
       {/* Mobile overlay */}
       {!sidebarCollapsed && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+        <div
+          className="fixed inset-0 bg-transparent z-40 lg:hidden"
           onClick={toggleSidebar}
         />
       )}
-      
-      <aside className={`
+
+      <aside
+        className={`
         fixed left-0 top-0 z-50 h-screen bg-[#1E3B5E] transition-all duration-300 ease-in-out
         lg:relative lg:z-auto
-        ${sidebarCollapsed ? '-translate-x-full lg:translate-x-0 lg:w-20' : 'translate-x-0 w-72'}
-      `}>
+        ${sidebarCollapsed ? "-translate-x-full lg:translate-x-0 lg:w-20" : "translate-x-0 w-72"}
+      `}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-4 border-b border-gray-700">
@@ -53,10 +65,12 @@ const Sidebar = () => {
                   <div className="h-8 w-8 bg-[#2A82EA] rounded-lg flex items-center justify-center">
                     <Brain size={20} className="text-white" />
                   </div>
-                  <span className="text-white font-semibold text-lg">DocuLens AI</span>
+                  <span className="text-white font-semibold text-lg">
+                    DocuLens AI
+                  </span>
                 </div>
               )}
-              
+
               {sidebarCollapsed && (
                 <div className="flex items-center justify-center w-full">
                   <div className="h-8 w-8 bg-[#2A82EA] rounded-lg flex items-center justify-center">
@@ -64,7 +78,7 @@ const Sidebar = () => {
                   </div>
                 </div>
               )}
-              
+
               {!sidebarCollapsed && (
                 <Button
                   variant="ghost"
@@ -101,8 +115,8 @@ const Sidebar = () => {
                     to={item.href}
                     className={({ isActive }) => `
                       flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-all
-                      ${isActive ? 'bg-[#2A82EA] text-white shadow-lg' : 'text-gray-200 hover:bg-[#2A82EA] hover:text-white'}
-                      ${sidebarCollapsed ? 'justify-center px-0' : ''}
+                      ${isActive ? "bg-[#2A82EA] text-white shadow-lg" : "text-gray-200 hover:bg-[#2A82EA] hover:text-white"}
+                      ${sidebarCollapsed ? "justify-center px-0" : ""}
                     `}
                     title={sidebarCollapsed ? item.name : undefined}
                   >
@@ -117,7 +131,7 @@ const Sidebar = () => {
             {!sidebarCollapsed && (
               <div className="mt-8 flex justify-center">
                 <button
-                  onClick={() => navigate('/upload')}
+                  onClick={() => navigate("/upload")}
                   className="h-14 w-14 bg-[#2A82EA] hover:bg-[#1E6FD9] rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-105"
                   title="Upload Document"
                 >
@@ -132,10 +146,10 @@ const Sidebar = () => {
                 to="/help"
                 className={({ isActive }) => `
                   flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-all
-                  ${isActive ? 'bg-[#2A82EA] text-white shadow-lg' : 'text-gray-200 hover:bg-[#2A82EA] hover:text-white'}
-                  ${sidebarCollapsed ? 'justify-center px-0' : ''}
+                  ${isActive ? "bg-[#2A82EA] text-white shadow-lg" : "text-gray-200 hover:bg-[#2A82EA] hover:text-white"}
+                  ${sidebarCollapsed ? "justify-center px-0" : ""}
                 `}
-                title={sidebarCollapsed ? 'Help & Support' : undefined}
+                title={sidebarCollapsed ? "Help & Support" : undefined}
               >
                 <HelpCircle size={22} className="flex-shrink-0" />
                 {!sidebarCollapsed && <span>Help & Support</span>}
@@ -145,10 +159,10 @@ const Sidebar = () => {
                 to="/templates"
                 className={({ isActive }) => `
                   flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-all
-                  ${isActive ? 'bg-[#2A82EA] text-white shadow-lg' : 'text-gray-200 hover:bg-[#2A82EA] hover:text-white'}
-                  ${sidebarCollapsed ? 'justify-center px-0' : ''}
+                  ${isActive ? "bg-[#2A82EA] text-white shadow-lg" : "text-gray-200 hover:bg-[#2A82EA] hover:text-white"}
+                  ${sidebarCollapsed ? "justify-center px-0" : ""}
                 `}
-                title={sidebarCollapsed ? 'Templates' : undefined}
+                title={sidebarCollapsed ? "Templates" : undefined}
               >
                 <LayoutTemplate size={22} className="flex-shrink-0" />
                 {!sidebarCollapsed && <span>Templates</span>}
@@ -165,7 +179,7 @@ const Sidebar = () => {
                   Storage Used: {storageUsed.used}GB / {storageUsed.total}GB
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2 mb-1">
-                  <div 
+                  <div
                     className="bg-[#2A82EA] h-2 rounded-full transition-all duration-300"
                     style={{ width: `${storagePercentage}%` }}
                   />
@@ -179,7 +193,7 @@ const Sidebar = () => {
             {/* Collapsed storage indicator */}
             {sidebarCollapsed && (
               <div className="p-3 flex justify-center items-center border-t border-gray-700">
-                <div 
+                <div
                   className="h-10 w-10 rounded-full border-2 border-[#2A82EA] flex items-center justify-center text-xs text-[#2A82EA] font-semibold"
                   title={`Storage: ${storageUsed.used}GB / ${storageUsed.total}GB (${Math.round(storagePercentage)}%)`}
                 >
@@ -190,14 +204,14 @@ const Sidebar = () => {
 
             {/* Settings */}
             <div className="border-t border-gray-700 p-3">
-              <NavLink 
-                to="/settings" 
+              <NavLink
+                to="/settings"
                 className={({ isActive }) => `
                   flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-all
-                  ${isActive ? 'bg-[#2A82EA] text-white shadow-lg' : 'text-gray-200 hover:bg-[#2A82EA] hover:text-white'}
-                  ${sidebarCollapsed ? 'justify-center px-0' : ''}
+                  ${isActive ? "bg-[#2A82EA] text-white shadow-lg" : "text-gray-200 hover:bg-[#2A82EA] hover:text-white"}
+                  ${sidebarCollapsed ? "justify-center px-0" : ""}
                 `}
-                title={sidebarCollapsed ? 'Settings' : undefined}
+                title={sidebarCollapsed ? "Settings" : undefined}
               >
                 <Settings size={22} className="flex-shrink-0" />
                 {!sidebarCollapsed && <span>Settings</span>}
