@@ -46,7 +46,7 @@ npm install
 
 2. Configure environment variables in `.env`:
 ```env
-PORT=3001
+PORT=3000
 NODE_ENV=development
 
 SUPABASE_URL=your_supabase_url
@@ -73,7 +73,7 @@ npm run dev
 npm start
 ```
 
-Server runs on **http://localhost:3001**
+Server runs on **http://localhost:3000**
 
 ## API Endpoints
 
@@ -198,15 +198,15 @@ This backend is AI-ready and can be extended with:
 
 ```bash
 # Test server is running
-curl http://localhost:3001
+curl http://localhost:3000
 
 # Test document upload
-curl -X POST http://localhost:3001/documents/upload \
+curl -X POST http://localhost:3000/documents/upload \
   -F "file=@document.pdf" \
   -F "metadata={\"category\":\"Financial\"}"
 
 # Test dashboard stats
-curl http://localhost:3001/analytics/dashboard
+curl http://localhost:3000/analytics/dashboard
 ```
 
 ## Notes

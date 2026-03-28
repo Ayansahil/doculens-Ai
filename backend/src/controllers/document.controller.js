@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
+import * as ragService from "../services/rag.service.js";
 
 // For ES modules __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -228,6 +229,17 @@ export const uploadDocument = async (req, res) => {
 
     console.log("✅ Document saved to database!");
     console.log("📌 Document ID:", data.id);
+
+    // 🚀 ASYNC CHUNKING & EMBEDDINGS (RAG)
+    if (extractedText) {
+      console.log("🤖 Starting RAG processing in background...");
+      // We don't 'await' this to keep upload speed fast, 
+      // but for this implementation we'll await to ensure success for now
+      await ragService.chunkAndStore(data.id, extractedText).catch(e => {
+        console.error("❌ RAG Processing failed:", e);
+      });
+    }
+
     console.log("========================================\n");
 
     res.status(201).json(data);

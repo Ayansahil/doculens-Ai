@@ -44,7 +44,7 @@ app.get("/", (req, res) => {
     message: "DocuLens AI Backend API",
     version: "1.0.0",
     status: "running",
-    port: process.env.PORT || 3001,
+    port: process.env.PORT || 3000,
     timestamp: new Date().toISOString(),
     endpoints: {
       health: "/",

@@ -4,7 +4,7 @@ Quick reference for all API endpoints.
 
 ## Base URL
 ```
-http://localhost:3001
+http://localhost:3000
 ```
 
 ---
@@ -84,7 +84,7 @@ Content-Type: multipart/form-data
 
 **Example:**
 ```bash
-curl -X POST http://localhost:3001/documents/upload \
+curl -X POST http://localhost:3000/documents/upload \
   -F "file=@document.pdf" \
   -F 'metadata={"category":"Financial","description":"Test doc"}'
 ```
@@ -313,7 +313,7 @@ formData.append('metadata', JSON.stringify({
   description: 'Test document'
 }));
 
-const response = await fetch('http://localhost:3001/documents/upload', {
+const response = await fetch('http://localhost:3000/documents/upload', {
   method: 'POST',
   body: formData
 });
@@ -324,20 +324,20 @@ const data = await response.json();
 ### cURL
 ```bash
 # Get dashboard stats
-curl http://localhost:3001/analytics/dashboard
+curl http://localhost:3000/analytics/dashboard
 
 # Upload document
-curl -X POST http://localhost:3001/documents/upload \
+curl -X POST http://localhost:3000/documents/upload \
   -F "file=@document.pdf" \
   -F 'metadata={"category":"Financial"}'
 
 # Send chat message
-curl -X POST http://localhost:3001/chat \
+curl -X POST http://localhost:3000/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"Summarize document","documentId":null}'
 
 # Get documents with filters
-curl "http://localhost:3001/documents?status=analysed&category=Financial&page=1&limit=10"
+curl "http://localhost:3000/documents?status=analysed&category=Financial&page=1&limit=10"
 ```
 
 ---

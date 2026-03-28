@@ -13,6 +13,7 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Badge from "../ui/Badge";
 import { useApp } from "../../context/AppContext";
+import { api } from "../../services/api";
 
 const ChatBot = ({
   documentId = null,
@@ -63,8 +64,18 @@ const ChatBot = ({
      SCROLL CHAT
   ================================ */
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    // 💡 SCROLL FIX: Use a more robust scroll to handle smooth rendering
+    const scrollToBottom = () => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+      }
+    };
+
+    // Multiple triggers for reliability
+    scrollToBottom();
+    const timer = setTimeout(scrollToBottom, 200);
+    return () => clearTimeout(timer);
+  }, [messages, isTyping]);
 
   /* ===============================
      BUILD STRUCTURED DATA FROM SUMMARY
@@ -112,19 +123,11 @@ const ChatBot = ({
     setIsTyping(true);
 
     try {
-      const response = await fetch("http://localhost:3001/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: userMessage.content,
-          documentId,
-        }),
-      });
+      const response = await api.sendChatMessage(userMessage.content, documentId);
+      const data = response.data;
 
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || data.message || "Failed");
+      if (!data.success) {
+        throw new Error(data.message || "Failed to get response");
       }
 
       setMessages((prev) => [
@@ -137,17 +140,18 @@ const ChatBot = ({
         },
       ]);
     } catch (error) {
+      const errorMsg = error.response?.data?.message || error.message || "Failed to process chat";
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now() + 1,
           type: "bot",
-          content: `❌ ${error.message}`,
+          content: `❌ ${errorMsg}`,
           timestamp: new Date().toISOString(),
         },
       ]);
 
-      addNotification({ type: "error", message: error.message });
+      addNotification({ type: "error", message: errorMsg });
     } finally {
       setIsTyping(false);
     }
@@ -173,11 +177,10 @@ const ChatBot = ({
       <div className="flex border-b border-gray-200">
         <button
           onClick={() => setActiveTab("structured")}
-          className={`px-4 py-3 text-sm font-medium border-b-2 ${
-            activeTab === "structured"
-              ? "border-primary-500 text-primary-600"
-              : "border-transparent text-gray-500"
-          }`}
+          className={`px-4 py-3 text-sm font-medium border-b-2 ${activeTab === "structured"
+            ? "border-primary-500 text-primary-600"
+            : "border-transparent text-gray-500"
+            }`}
         >
           <div className="flex items-center gap-2">
             <FileText size={16} />
@@ -187,15 +190,19 @@ const ChatBot = ({
 
         <button
           onClick={() => setActiveTab("chatbot")}
-          className={`px-4 py-3 text-sm font-medium border-b-2 ${
-            activeTab === "chatbot"
-              ? "border-primary-500 text-primary-600"
-              : "border-transparent text-gray-500"
-          }`}
+          className={`px-4 py-3 text-sm font-medium border-b-2 ${activeTab === "chatbot"
+            ? "border-primary-500 text-primary-600"
+            : "border-transparent text-gray-500"
+            }`}
         >
           <div className="flex items-center gap-2">
             <MessageSquare size={16} />
             Chatbot
+            {documentId && (
+              <Badge variant="success" size="sm" className="ml-1 scale-75 origin-left">
+                Context ON
+              </Badge>
+            )}
           </div>
         </button>
       </div>
@@ -261,16 +268,14 @@ const ChatBot = ({
               {messages.map((m) => (
                 <div
                   key={m.id}
-                  className={`flex ${
-                    m.type === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${m.type === "user" ? "justify-end" : "justify-start"
+                    }`}
                 >
                   <div
-                    className={`max-w-[75%] p-3 rounded-lg ${
-                      m.type === "user"
-                        ? "bg-primary-500 text-white"
-                        : "bg-gray-100"
-                    }`}
+                    className={`max-w-[75%] p-3 rounded-lg ${m.type === "user"
+                      ? "bg-primary-500 text-white"
+                      : "bg-gray-100"
+                      }`}
                   >
                     {m.content}
                   </div>

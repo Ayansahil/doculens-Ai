@@ -17,7 +17,7 @@ npm install
 npm start
 ```
 
-The server will run on **http://localhost:3001**
+The server will run on **http://localhost:3000**
 
 For development with auto-reload:
 ```bash
@@ -26,7 +26,7 @@ npm run dev
 
 ### 3. Verify Backend is Running
 
-Open your browser and visit: http://localhost:3001
+Open your browser and visit: http://localhost:3000
 
 You should see:
 ```json
@@ -87,19 +87,19 @@ Your frontend will connect to the backend automatically!
 
 ### Upload a Document
 ```bash
-curl -X POST http://localhost:3001/documents/upload \
+curl -X POST http://localhost:3000/documents/upload \
   -F "file=@document.pdf" \
   -F 'metadata={"category":"Financial","description":"Test document"}'
 ```
 
 ### Get Dashboard Stats
 ```bash
-curl http://localhost:3001/analytics/dashboard
+curl http://localhost:3000/analytics/dashboard
 ```
 
 ### Send Chat Message
 ```bash
-curl -X POST http://localhost:3001/chat \
+curl -X POST http://localhost:3000/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"Summarize this document","documentId":null}'
 ```
@@ -107,7 +107,7 @@ curl -X POST http://localhost:3001/chat \
 ## Environment Configuration
 
 The backend is configured with:
-- **Port**: 3001
+- **Port**: 3000
 - **Database**: Supabase (already connected)
 - **File Storage**: Local `/uploads` directory
 - **Max File Size**: 50MB
@@ -168,9 +168,9 @@ You requested MongoDB, but I used **Supabase** instead because:
 ## Troubleshooting
 
 ### Port Already in Use
-If port 3001 is busy:
+If port 3000 is busy:
 ```bash
-# Edit backend/.env and change PORT=3001 to another port
+# Edit backend/.env and change PORT=3000 to another port
 # Then update frontend .env VITE_API_BASE_URL accordingly
 ```
 
